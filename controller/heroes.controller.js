@@ -1,6 +1,8 @@
 /////////////CONTROLLER////////////
 const db = require("../model/heroes.model.js");
 const Heroe = db.heroes;
+const _ = require('underscore');
+const express = require('express');
 
 //CREATE OPERATION
 exports.create = (req, res) => {
@@ -159,52 +161,92 @@ exports.grouping = (req,res) => {
   });
 }
 
+//PAGINATION:
+// async espera a que responda:
+exports.pagination = async(req, res) => {
+  const {page = 1, limit = 3} = req.query;
+  try{
+    // Ejecutar query con número de página y el límite de documentos.
+    const heroes = await Heroe.find()
+    .limit(limit + 1)
+    .skip((page - 1) * limit).exec();
+    console.log(heroes);
+
+    // Obtener el total de documentos en la colección:
+    const total = await Heroe.countDocuments();
+
+    // Enviar respuesta:
+    res.json({
+      heroes,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page //Devolverá la página en la que se está trabajando.
+    });
+  }
+  catch(err){
+    throwError(res,err);
+  }
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 /********(POST)INSERTAR*********/ 
 exports.insertarHeroe =(req,res) => {
   let body = req.body;
   let Newheroe = new Heroe([
     {$lookup: {from: 'Heroes',
-    _id: _id.body,
+    // _id: _id.body,
     nombre: nombre.body,
     bio: bio.body,
-    img: img.body,
+    // img: img.body,
     aparicion: aparicion.body,
     casa: casa.body,
     activo: activo.body}}
-  ])
-  .catch(err => {
-    throwError(res, err);
-  });
-}
-
-/********(POST)ACTUALIZAR*********/ 
-exports.actualizarHeroe = (req, res) => {
-  if (!req.body){
-  return res.status(400).send({
-    msg:'La petición no puede ser vacía.'
-  });
-}
-const id= req.params.id;
-Heroe.findByIdAndUpdate(id, req.body, {useFindAndModify: false})
-.then(data => {
-  if (!data) {
-    res.status(404).send({
-      msg: `No se pudo actualizar Heroe con id: ${id}`
+  ]);
+  
+  Newheroe.save((err, HeroeBD) => {
+    // Si hubo algún error:
+    if (err){
+      return res.status(400).json({
+        ok: false,
+        msg: 'Ocurrió un error.',
+        err
+      });
+    }
+    res.json({
+      ok: true,
+      msg: 'Heroe insertado con éxito.',
+      HeroeBD
     });
-  } 
-  else res.send({
-    msg: 'Heroe actualizado exitosamente.'
   });
-})
-.catch(err => {
-  throwError(res,err);
-})
+}
+  
+  /********(POST)ACTUALIZAR*********/ 
+  exports.actualizarHeroe = (req, res) => {
+    let id = req.params.id;
+    let body = _.pick(req.body, ['nombre', 'casa'])// pick: agarra de body los parámetros que desees.
+    // new: si no lo encuentra, lo crea.}
+    // runValidators: Ejecute validores para que cheque los parámetros.(no se multipliquen o haya errores.)
+    Usuario.findByIdAndUpdate(id, body, 
+      { new: true, runValidators: true, context: 'query'},
+      (err, HeroeBD) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          msg: 'Ocurrió un error al momento de actualizar.',
+          err
+        });
+      }
+      res.json({
+        ok: true,
+        msg: 'Usuario actualizado con éxito.',
+        usuario: HeroeBD
+      });
+  });
 };
+
 /********(DELETE)ELIMINAR*********/ 
 exports.eliminarHeroe =(req,res) => {
   Heroe.findByIdAndUpdate(id, {activo: false }, {new: true, runValidators: true, context: 'query'},
-  (err, usrDB) =>{
+  (err, HeroeBD) =>{
     if (err){
             return res.status(400).json({
               ok: false,
@@ -214,11 +256,12 @@ exports.eliminarHeroe =(req,res) => {
           }
           res.json({
             ok: true,
-            msg: 'Herpe eliminado exitosamente.',
-            usrDB 
+            msg: 'Heroe eliminado exitosamente.',
+            HeroeBD 
           });
   });
 }
+
 ////////////////////////////////////////////////////////////////////////////////////
 
   // Utilería:

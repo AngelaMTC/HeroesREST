@@ -26,7 +26,7 @@ exports.create = (req, res) => {
 
   heroe.save()
     .then((data) => {
-      res.send({ msg: "Usuario agregado correctamente" });
+      res.send({ msg: "Heroe insertado exitosamente." });
     })
     .catch((err) => {
       res.status(500).send({ message: err.message || "Ocurrió un error." });
@@ -56,7 +56,7 @@ exports.create = (req, res) => {
         if (!data)
           res
             .status(500)
-            .send({ message: `No se encontró elemento con id: ${id}.` });
+            .send({ message: `No se encontró Heroe con id: ${id}.` });
         else res.send(data);
       })
       .catch((err) => {
@@ -107,11 +107,11 @@ exports.create = (req, res) => {
   .then(data => {
     if (!data) {
       res.status(404).send({
-        msg: `No se pudo actualizas Heroe con id: ${id}`
+        msg: `No se pudo actualizar Heroe con id: ${id}`
       });
     } 
     else res.send({
-      msg: 'Heroe actualizado exitosamente.'
+      msg: 'Heroe actualizado con éxito.'
     });
   })
   .catch(err => {
@@ -129,10 +129,10 @@ exports.create = (req, res) => {
     .then(data => {
       if (!data)
       res.status(404).send({
-        msg: `El usuario no se pudo actualizar con el id: ${id}`
+        msg: `El Heroe no se pudo actualizar con el id: ${id}`
       });
       else res.send({
-        msg: 'Heroe se ha removido exitosamente.'
+        msg: 'Heroe se ha removido con éxito.'
       });
     })
       .catch(err  => {

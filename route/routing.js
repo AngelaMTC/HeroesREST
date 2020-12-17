@@ -15,23 +15,14 @@ router.get("/heroesTerm", heroes.findSome);
 // // GET Active
 router.get("/heroesAct", heroes.findActive);
 
-// GET Agrupación(aggregate):
-router.get('/heroesGroup', heroes.grouping);
+// GET Agrupación
+router.get("/heroesGroup", heroes.grouping);
 
-//PAGINATION:
-router.get('/pageH', heroes.pagination)
+// GET Paginación
+router.get("/heroesPag", heroes.pagination);
 
 // POST Heroe
-// router.post("/heroe",heroes.create);
-
-/** POST Insertar Heroe:**/
-router.post('/InsH', heroes.insertarHeroe);
-
-/**POST Actualizar Heroe**/ 
-// router.post('/ActH', heroes.actualizarHeroe);
-
-/**DELETE Eliminar Heroe**/ 
-// router.post('/EliH', heroes.eliminarHeroe);
+router.post("/Insheroe",heroes.create);
 
 // DELETE Heroe:
 router.delete("/hero/:id", heroes.delete);
